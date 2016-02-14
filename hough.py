@@ -12,13 +12,15 @@ class image_converter:
 
     def __init__(self):
 
-        #cv2.namedWindow("Image window", 1)
+
         cv2.namedWindow("detected circles", 1)
         cv2.startWindowThread()
         self.bridge = CvBridge()
+        #Used to access the simulated turtlebot's camera
         self.image_sub = rospy.Subscriber("/turtlebot_1/camera/rgb/image_raw",
                                           Image, self.callback)
-        #self.image_sub = rospy.Subscriber("/turtlebot_1/camera/rgb/image_raw",
+        #Used for the real turtlebot                                  
+        #self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",
         #                                  Image, self.callback)
 
     def callback(self, data):
@@ -30,9 +32,11 @@ class image_converter:
         img = cv2.cvtColor(cimg,cv2.COLOR_BGR2GRAY)
         img = cv2.medianBlur(img,5)
 
+        #Identify location of circles
         circles = cv2.HoughCircles(img,cv.CV_HOUGH_GRADIENT,4,20,
                             param1=230,param2=230,minRadius=0,maxRadius=0)
 
+        #Do nothing if there are no circles
         if circles is not None:
             print len(circles)
             circles = np.uint16(np.around(circles))
