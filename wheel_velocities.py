@@ -35,8 +35,8 @@ class wheel_velocities:
             twist_msg = Twist()
             
             twist_msg.angular.x = wheel_left[0]
-        self.pub.publish(twist_msg)        
-        r.sleep()
+            self.pub.publish(twist_msg)        
+            r.sleep()
        
 def forward_kinematics(w_l, w_r):
     c_l = wheel_radius * w_l
