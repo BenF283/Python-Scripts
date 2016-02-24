@@ -7,14 +7,8 @@ Created on Mon Feb 22 23:38:18 2016
 
 import rospy
 import cv2
-<<<<<<< HEAD
 import numpy
 #import numpy as np
-=======
-import cv2.cv as cv
-import numpy as np
-from geometry_msgs.msg import Twist
->>>>>>> 4147749e67c2c786ac9a16e62a55946ef09c55d2
 
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -45,24 +39,17 @@ class braitenberg_love:
         cv2.startWindowThread()
         self.bridge = CvBridge()
         #Used to access the simulated turtlebot's camera
-        self.image_sub = rospy.Subscriber('/turtlebot_1/camera/rgb/image_raw',
+        self.image_sub = rospy.Subscriber("/turtlebot_1/camera/rgb/image_raw",
                                           Image, self.callback)
-<<<<<<< HEAD
         #Real robot
         #self.image_sub = rospy.Subscriber("/usb_cam/image_raw",
         #                                  Image, self.callback)
                                           
         self.pub = rospy.Publisher("/turtlebot_1/cmd_vel", Twist, queue_size=10)
         print 'INIT COMPLETE'
-=======
-        #self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",
-        #                                  Image, self.callback)
-        self.pub = rospy.Publisher('/turtlebot_1/cmd_vel', Twist, queue_size=10)
->>>>>>> 4147749e67c2c786ac9a16e62a55946ef09c55d2
                                           
     def callback(self, data):
             
-<<<<<<< HEAD
             try:
                 cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
             except CvBridgeError, e:
@@ -117,21 +104,4 @@ rospy.init_node('braitenberg_love', anonymous=True)
 bl = braitenberg_love()
 bl.talker()
 rospy.spin()
-=======
-        cv2.imshow('Image feed', cv_image)
-
-    def move(self):
-        r = rospy.Rate(10)
-        while not rospy.is_shutdown():
-            twist_msg = Twist()            
-            twist_msg.linear.x = 1.0
-            self.pub.publish(twist_msg)
-            r.sleep()
-        
-if __name__ == '__main__':
-    rospy.init_node('braitenberg_love', anonymous=True)
-    bl = braitenberg_love()
-    bl.move()
-    rospy.spin()
->>>>>>> 4147749e67c2c786ac9a16e62a55946ef09c55d2
 cv2.destroyAllWindows()
