@@ -51,6 +51,7 @@ class vision_hsvsplit:
             #Split the thresholds into two seperate images
             img_left = hsv_thresh[0:(height-self.trim), 0:(width/2)]
             img_right = hsv_thresh[0:(height-self.trim), (width/2):width]
+            print 'Left: ' + str(numpy.mean(img_left)) + ' Right: ' + str(numpy.mean(img_right))
             cv2.imshow('Threshold left', img_left)
             cv2.imshow('Threshold right', img_right)
             cv2.imshow('Image feed', cv_image)
