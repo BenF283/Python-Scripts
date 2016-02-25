@@ -2,6 +2,9 @@
 """
 Created on Mon Feb 22 23:38:18 2016
 
+A script implementing the braitenberg love robot design. Additional code has
+been added to prevent collisions with walls and other objects
+
 @author: ben
 """
 
@@ -13,14 +16,6 @@ import numpy
 from sensor_msgs.msg import Image, LaserScan
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
-
-
-trim = 60 #number of pixels to shave off, used to omit the turtlebot shelf from image
-wheel_radius = 1
-robot_radius = 1
-
-
-
  
 
 class braitenberg_love:
@@ -32,7 +27,14 @@ class braitenberg_love:
     #Set some maximum velocities so we don't race the bots
     vel_linear_limit = 0.6 
     vel_angular_limit = 0.8
+
+    #define robot dimensions
+    wheel_radius = 1
+    robot_radius = 1
     
+    #number of pixels to shave off, used to omit the turtlebot shelf from image
+    trim = 60 
+
     #Initialise depth value
     center_depth = 0.0
              
@@ -78,11 +80,15 @@ class braitenberg_love:
                                  numpy.array((0, 0, 0)),
                                  numpy.array((255, 20, 40)))
         #Split the thresholds into two seperate images
-        img_left = hsv_thresh[0:(height-trim), 0:(width/2)]
-        img_right = hsv_thresh[0:(height-trim), (width/2):width]
+        img_left = hsv_thresh[0:(height-self.trim), 0:(width/2)]
+        img_right = hsv_thresh[0:(height-self.trim), (width/2):width]
+        
+        #Show images to windows
         cv2.imshow('Threshold left', img_left)
         cv2.imshow('Threshold right', img_right)
         cv2.imshow('Image feed', cv_image)
+
+        #Calculate and store the mean
         self.mean_left = numpy.mean(img_left)
         self.mean_right = numpy.mean(img_right)
  
@@ -136,10 +142,10 @@ class braitenberg_love:
     
     #Code to convert the velocities 
     def forward_kinematics(self, w_l, w_r):
-        c_l = wheel_radius * w_l
-        c_r = wheel_radius * w_r
+        c_l = self.wheel_radius * w_l
+        c_r = self.wheel_radius * w_r
         v = (c_l + c_r) / 2
-        a = (c_l - c_r) / robot_radius
+        a = (c_l - c_r) / self.robot_radius
         return (v, a)   
 
 #Initialise a new node for our code           
