@@ -54,17 +54,17 @@ class braitenberg_love:
         self.bridge = CvBridge()
         
         #Camera Subscriber
-        self.image_sub = rospy.Subscriber("/turtlebot_1/camera/rgb/image_raw",
+        self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",
                                           Image, self.imaging_callback)
         #Real robot
         #self.image_sub = rospy.Subscriber("/usb_cam/image_raw",
         #                                  Image, self.callback)
 
         #Scan subscriber        
-        self.depth_sub = rospy.Subscriber("/turtlebot_1/scan",
+        self.depth_sub = rospy.Subscriber("/scan",
                                           LaserScan, self.depth_callback)
         #Publisher for velocities
-        self.pub = rospy.Publisher("/turtlebot_1/cmd_vel", Twist, queue_size=10)
+        self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
                                           
     def imaging_callback(self, data):
 
@@ -77,8 +77,8 @@ class braitenberg_love:
         height, width, channels = hsv_img.shape        
 
         hsv_thresh = cv2.inRange(hsv_img,
-                                 numpy.array((0, 0, 0)),
-                                 numpy.array((255, 20, 40)))
+                                 numpy.array((0, 80, 0)),
+                                 numpy.array((8, 255, 255)))
         #Split the thresholds into two seperate images
         img_left = hsv_thresh[0:(height-self.trim), 0:(width/2)]
         img_right = hsv_thresh[0:(height-self.trim), (width/2):width]
@@ -103,6 +103,9 @@ class braitenberg_love:
             msg = ""
             #Perform forward kinematics operation
             v, a = self.forward_kinematics(1 - (self.mean_right/255),1  - (self.mean_left/255))
+            print self.mean_left
+            print self.mean_right
+            
             
             #Create a twist message
             twist_msg = Twist()
@@ -136,6 +139,7 @@ class braitenberg_love:
                 msg = "Moving..."
 
             #Publish!
+            print 
             self.pub.publish(twist_msg)
             print msg
             r.sleep()
