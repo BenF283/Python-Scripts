@@ -8,15 +8,20 @@ _db = sqlite3.connect('milkandball.db')
 _cursor = _db.cursor()
 
 class databaseRequestHandler(tornado.web.RequestHandler):
-	def delete(self):
-         _cursor.execute("DROP TABLE IF EXISTS data")
-         _cursor.execute("CREATE TABLE data (item STRING, price REAL, quantity INT)")
-         milk_values = ["milk", None, None]
-         ball_values = ["ball", None, None]
-         _cursor.execute("INSERT INTO data VALUES (?,?,?)", milk_values)
-         _cursor.execute("INSERT INTO data VALUES (?,?,?)", ball_values)
-         _db.commit()
-         self.write('OK')
+    def delete(self):
+        _cursor.execute("DROP TABLE IF EXISTS data")
+        _cursor.execute("CREATE TABLE data (item STRING, price REAL, quantity INT)")
+        milk_values = ["milk", None, None]
+        ball_values = ["ball", None, None]
+        _cursor.execute("INSERT INTO data VALUES (?,?,?)", milk_values)
+        _cursor.execute("INSERT INTO data VALUES (?,?,?)", ball_values)
+        _db.commit()
+        self.write('OK')
+    def get(self):
+        _cursor.execute("SELECT * FROM sqlite_master")
+        for row in _cursor:
+            self.write(row[0])
+         
          
 class itemRequestHandler(tornado.web.RequestHandler):
     def put(self, item):
