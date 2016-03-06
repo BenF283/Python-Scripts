@@ -10,7 +10,7 @@ _cursor = _db.cursor()
 class databaseRequestHandler(tornado.web.RequestHandler):
 	def delete(self):
          _cursor.execute("DROP TABLE IF EXISTS data")
-         _cursor.execute("CREATE TABLE data (item STRING, price REAL, quantity INT)")
+         _cursor.execute("CREATE TABLE data (item STRING, price DECIMAL(3,2), quantity INT)")
          milk_values = ["milk", 0.0, 0]
          ball_values = ["ball", 0.0, 0]
          _cursor.execute("INSERT INTO data VALUES (?,?,?)", milk_values)
