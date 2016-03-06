@@ -33,11 +33,14 @@ class itemRequestHandler(tornado.web.RequestHandler):
             self.write('OK')
     def get(self, item):
         if self.get_argument("price") == 'true':
-            itemprice = _cursor.execute("SELECT price FROM data WHERE item=?", item)
-            self.write(item+" total stock value: "+ itemprice)
+	    
+            _cursor.execute("SELECT price FROM data WHERE item=?", (item,))
+	    for row in _cursor:
+                self.write(item+" total stock quantity: "+str(row[0]))
         elif self.get_argument("quantity") == 'true':
-            itemquantity = _cursor.execute("SELECT quantity FROM data WHERE item=?", item)            
-            self.write(item+" total stock value: "+itemquantity)
+            itemquantity = _cursor.execute("SELECT quantity FROM data WHERE item=(?)", (item,))            
+	    for row in _cursor:
+                self.write(item+" total stock value: "+str(row[0]))
         
             
 
