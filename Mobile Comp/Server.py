@@ -50,7 +50,7 @@ application = tornado.web.Application([
 #(r"/sensor/([0-9]+)", sensorRequestHandler),
     (r"/database", databaseRequestHandler),
     (r"/item/milk", milkRequestHandler),
-    (r"/item/ball", ballRequestHandler),    
+    #(r"/item/ball", ballRequestHandler),    
  
 ])
 
