@@ -11,8 +11,8 @@ class databaseRequestHandler(tornado.web.RequestHandler):
 	def delete(self):
          _cursor.execute("DROP TABLE IF EXISTS data")
          _cursor.execute("CREATE TABLE data (item STRING, price STRING, quantity INT)")
-         milk_values = ["milk", 0.0, 0]
-         ball_values = ["ball", 0.0, 0]
+         milk_values = ["milk", None, None]
+         ball_values = ["ball", None, None]
          _cursor.execute("INSERT INTO data VALUES (?,?,?)", milk_values)
          _cursor.execute("INSERT INTO data VALUES (?,?,?)", ball_values)
          _db.commit()
@@ -38,31 +38,10 @@ class itemRequestHandler(tornado.web.RequestHandler):
 	    for row in _cursor:
                 self.write(item+" unit price: "+str(row[0]))
         elif self.get_argument("quantity") == 'true':
-            cursor.execute("SELECT quantity FROM data WHERE item=(?)", (item,))            
+            _cursor.execute("SELECT quantity FROM data WHERE item=(?)", (item,))            
 	    for row in _cursor:
                 self.write(item+" stock level: "+str(row[0]))
         
-            
-
-#class databaseRequestHandler(tornado.web.RequestHandler):
-#	def get(self, ID):
-#	    range = self.get_argument("range",default="0,"+str(sys.maxint)).split(',')
-#	    params = [ID]+range
-#	    _cursor.execute("SELECT * FROM data WHERE ID=? AND time>=? AND time <=?", params)
-#	    records = []
-#	    for row in _cursor:
-#		records = records + [{'ID':row[0],'value':row[1],'time':row[2]}]
-#	    self.write(tornado.escape.json_encode(records))
-#	def put(self, ID):
-#	    record = (int(ID), float(self.get_argument("value")), int(self.get_argument("time")))
-#	    _cursor.execute("INSERT INTO data VALUES (?,?,?)", record)
-#	    _db.commit()
-#	    self.write('OK')
-#	def delete(self):
-#		_cursor.execute("DROP TABLE IF EXISTS data")
-#		_cursor.execute("CREATE TABLE data (ID INT, value REAL, time INT)")
-#		_db.commit()
-#		self.write('OK')
 
 application = tornado.web.Application([
 #(r"/sensor/([0-9]+)", sensorRequestHandler),
