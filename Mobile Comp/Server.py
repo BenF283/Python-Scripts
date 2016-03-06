@@ -20,25 +20,21 @@ class databaseRequestHandler(tornado.web.RequestHandler):
          
 class itemRequestHandler(tornado.web.RequestHandler):
     def put(self, item):
-        price = self.get_argument("price")
-        quantity = self.get_argument("quantity")
-        if price != None:
-            record = (price, item)
+      
+        if self.get_argument("price") != None:
+            record = (self.get_argument("price"), item)
             _cursor.execute("UPDATE data SET price=? WHERE item=?", record)
             _db.commit()
             self.write('OK')
-        elif quantity != None:
-            record = (quantity, item)
+        elif self.get_argument("quantity") != None:
+            record = (self.get_argument("quantity"), item)
             _cursor.execute("UPDATE data SET quantity=? WHERE item=?", record)
             _db.commit()
             self.write('OK')
     def get(self, item):
-        ans_price = self.get_price("price")        
-        ans_quantity = self.get_argument("quantity")
-
-        if ans_price == 'true':
+        if self.get_argument("price") == 'true':
             self.write(item+" total stock value: "+_cursor.execute("SELECT price FROM data WHERE item=?", item))
-        elif ans_quantity == 'true':
+        elif self.get_argument("quantity") == 'true':
             self.write(item+" total stock value: "+_cursor.execute("SELECT quantity FROM data WHERE item=?", item))
         
             
