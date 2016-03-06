@@ -18,9 +18,9 @@ class databaseRequestHandler(tornado.web.RequestHandler):
          _db.commit()
          self.write('OK')
 class milkRequestHandler(tornado.web.RequestHandler):
-    def put(self):
-        record = ("milk", float(self.get_argument("price")),int(self.get_argument("quantity")))
-        _cursor.execute("UPDATE data WHERE item=? SET price=?, quantity=?", record)
+    def put(self, item):
+        record = (item, float(self.get_argument("price")))
+        _cursor.execute("UPDATE data WHERE item=? SET price=?", record)
         _db.commit()
         self.write('OK')
         
@@ -49,7 +49,7 @@ class milkRequestHandler(tornado.web.RequestHandler):
 application = tornado.web.Application([
 #(r"/sensor/([0-9]+)", sensorRequestHandler),
     (r"/database", databaseRequestHandler),
-    (r"/item/milk", milkRequestHandler),
+    (r"/item/", itemRequestHandler),
     #(r"/item/ball", ballRequestHandler),    
  
 ])
