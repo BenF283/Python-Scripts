@@ -9,11 +9,22 @@ _cursor = _db.cursor()
 
 class databaseRequestHandler(tornado.web.RequestHandler):
 	def delete(self):
-		_cursor.execute("DROP TABLE IF EXISTS data")
-		_cursor.execute("CREATE TABLE data (ID INT, price REAL, quantity INT)")
-		_db.commit()
-		self.write('OK')
-  
+         _cursor.execute("DROP TABLE IF EXISTS data")
+         _cursor.execute("CREATE TABLE data (item STRING, price REAL, quantity INT)")
+         milk_values = ["milk", 0.0, 0]
+         ball_values = ["ball", 0.0, 0]
+         _cursor.execute("INSERT INTO data VALUES (?,?,?)", milk_values)
+         _cursor.execute("INSERT INTO data VALUES (?,?,?)", ball_values)
+         _db.commit()
+         self.write('OK')
+class milkRequestHandler(tornado.web.RequestHandler):
+    def put(self):
+        record = ("milk", float(self.get_argument("price")),int(self.get_argument("quantity")))
+        _cursor.execute("UPDATE data WHERE item=? SET price=?, quantity=?", record)
+        _db.commit()
+        self.write('OK')
+        
+            
 
 #class databaseRequestHandler(tornado.web.RequestHandler):
 #	def get(self, ID):
@@ -36,8 +47,11 @@ class databaseRequestHandler(tornado.web.RequestHandler):
 #		self.write('OK')
 
 application = tornado.web.Application([
-	#(r"/sensor/([0-9]+)", sensorRequestHandler),
-	(r"/database", databaseRequestHandler),
+#(r"/sensor/([0-9]+)", sensorRequestHandler),
+    (r"/database", databaseRequestHandler),
+    (r"/item/milk", milkRequestHandler),
+    (r"/item/ball", ballRequestHandler),    
+ 
 ])
 
 if __name__ == "__main__":
