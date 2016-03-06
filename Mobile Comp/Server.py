@@ -20,8 +20,8 @@ class databaseRequestHandler(tornado.web.RequestHandler):
          
 class itemRequestHandler(tornado.web.RequestHandler):
     def put(self, item):
-        record = (item, float(self.get_argument("price")))
-        _cursor.execute("UPDATE data WHERE item=? SET price=?", record)
+        record = (self.get_argument("price"), item)
+        _cursor.execute("UPDATE data SET price=? WHERE item=?", record)
         _db.commit()
         self.write('OK')
         
