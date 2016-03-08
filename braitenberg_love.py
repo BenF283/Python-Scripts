@@ -54,17 +54,17 @@ class braitenberg_love:
         self.bridge = CvBridge()
         
         #Camera Subscriber
-        self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",
+        self.image_sub = rospy.Subscriber("/turtlebot_1/camera/rgb/image_raw",
                                           Image, self.imaging_callback)
         #Real robot
         #self.image_sub = rospy.Subscriber("/usb_cam/image_raw",
         #                                  Image, self.callback)
 
         #Scan subscriber        
-        self.depth_sub = rospy.Subscriber("/scan",
+        self.depth_sub = rospy.Subscriber("/turtlebot_1/scan",
                                           LaserScan, self.depth_callback)
         #Publisher for velocities
-        self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
+        self.pub = rospy.Publisher("/turtlebot_1/cmd_vel", Twist, queue_size=10)
                                           
     def imaging_callback(self, data):
 
@@ -73,12 +73,14 @@ class braitenberg_love:
         except CvBridgeError, e:
             print e
         
+        #Convert to hsv
         hsv_img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        #Get height and width
         height, width, channels = hsv_img.shape        
 
         hsv_thresh = cv2.inRange(hsv_img,
-                                 numpy.array((0, 80, 0)),
-                                 numpy.array((8, 255, 255)))
+                                 numpy.array((0, 0, 0)),
+                                 numpy.array((180, 255, 20)))
         #Split the thresholds into two seperate images
         img_left = hsv_thresh[0:(height-self.trim), 0:(width/2)]
         img_right = hsv_thresh[0:(height-self.trim), (width/2):width]
@@ -93,7 +95,7 @@ class braitenberg_love:
         self.mean_right = numpy.mean(img_right)
  
     def depth_callback(self, data):
-        self.center_depth = data.ranges[len(data.ranges)/2]
+        self.center_depth = numpy.nanmin(data.ranges)
         #self.center_depth = numpy.mean(data.ranges)
         
             
@@ -102,6 +104,7 @@ class braitenberg_love:
             r = rospy.Rate(10)
             msg = ""
             #Perform forward kinematics operation
+            #The value is inversed so the robot moves slower when closer to loved objects.
             v, a = self.forward_kinematics(1 - (self.mean_right/255),1  - (self.mean_left/255))
             print self.mean_left
             print self.mean_right
@@ -111,7 +114,7 @@ class braitenberg_love:
             twist_msg = Twist()
             
             #Check if turtlebot is close to an object, if it's the "loved" object then stop.
-            if self.center_depth < 1.5 and (self.mean_right + self.mean_left) / 2 > 10:
+            if self.center_depth < 1.5 and self.mean_right > 1 and self.mean_left > 1:
                 twist_msg.linear.x = 0.0
                 twist_msg.angular.z = 0.0
                 msg = "Close to loved object"
@@ -128,9 +131,7 @@ class braitenberg_love:
                 #moving at ridiculous speeds
                 if v > self.vel_linear_limit:
                     v = self.vel_linear_limit
-                    msg = msg + "Linear velocity limited. "
                 if a > self.vel_angular_limit:
-                    msg = msg + "Angular velocity limited. "
                     a = self.vel_angular_limit   
                 
                 #Add the values to the twist message
