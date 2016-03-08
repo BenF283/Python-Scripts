@@ -20,7 +20,7 @@ class databaseRequestHandler(tornado.web.RequestHandler):
     def get(self):
         _cursor.execute("SELECT * FROM sqlite_master")
         for row in _cursor:
-            self.write(row[0])
+            self.write(row)
          
          
 class itemRequestHandler(tornado.web.RequestHandler):
