@@ -119,13 +119,13 @@ class braitenberg_love:
             twist_msg = Twist()
             
             #Check if turtlebot is close to an object, if it's the "loved" object then stop.
-            if self.center_depth < 1.5 and self.mean_right > 1 and self.mean_left > 1:
+            if self.depth < 1.5 and self.mean_right > 1 and self.mean_left > 1:
                 twist_msg.linear.x = 0.0
                 twist_msg.angular.z = 0.0
                 msg = "Close to loved object"
             #If it's something else (i.e a wall/obstruction), try moving in a 
             #different direction
-            elif self.center_depth < 1.5:
+            elif self.depth < 1.5:
                 twist_msg.angular.z = self.vel_angular_limit
                 msg = "Close to wall, rotating"
             #Otherwise continue with sensor values
