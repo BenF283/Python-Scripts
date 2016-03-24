@@ -11,7 +11,6 @@ been added to prevent collisions with walls and other objects
 import rospy
 import cv2
 import numpy
-#import numpy as np
 
 from sensor_msgs.msg import Image, LaserScan
 from cv_bridge import CvBridge, CvBridgeError
@@ -24,19 +23,19 @@ class braitenberg_love:
     mean_left = 0.0
     mean_right = 0.0
     
-    #Set some maximum velocities so we don't race the bots
+    #Set some maximum velocities so the bots don't go out of control
     vel_linear_limit = 0.6 
     vel_angular_limit = 0.8
 
     #define robot dimensions
     wheel_radius = 1
-    robot_radius = 1
+    robot_radius = 3
     
-    #number of pixels to shave off, used to omit the turtlebot shelf from image
+    #number of pixels to shave off, used to omit the turtlebot shelf from image in simulations
     trim = 60 
 
     #Initialise depth value
-    center_depth = 0.0
+    depth = 0.0
              
     def __init__(self):
 
@@ -54,17 +53,19 @@ class braitenberg_love:
         self.bridge = CvBridge()
         
         #Camera Subscriber
-        self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",
+        self.image_sub = rospy.Subscriber("/turtlebot_1/camera/rgb/image_raw",
                                           Image, self.imaging_callback)
-        #Real robot
-        #self.image_sub = rospy.Subscriber("/usb_cam/image_raw",
-        #                                  Image, self.callback)
-
+        #Real turtlebot
+        #self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",
+                                          #Image, self.imaging_callback)
         #Scan subscriber        
-        self.depth_sub = rospy.Subscriber("/scan",
+        self.depth_sub = rospy.Subscriber("/turtlebot_1/scan",
                                           LaserScan, self.depth_callback)
+                                          
+        #self.depth_sub = rospy.Subscriber("/scan",
+                                          #LaserScan, self.depth_callback)
         #Publisher for velocities
-        self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
+        self.pub = rospy.Publisher("/turtlebot_1/cmd_vel", Twist, queue_size=10)
                                           
     def imaging_callback(self, data):
 
@@ -73,9 +74,12 @@ class braitenberg_love:
         except CvBridgeError, e:
             print e
         
+        #Convert to hsv
         hsv_img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        #Get height and width
         height, width, channels = hsv_img.shape        
 
+        #Threshold red values H: 0 - 8 S: 80-255 V: 0-255
         hsv_thresh = cv2.inRange(hsv_img,
                                  numpy.array((0, 80, 0)),
                                  numpy.array((8, 255, 255)))
@@ -92,26 +96,30 @@ class braitenberg_love:
         self.mean_left = numpy.mean(img_left)
         self.mean_right = numpy.mean(img_right)
  
+     #Callback for scan data
     def depth_callback(self, data):
-        self.center_depth = data.ranges[len(data.ranges)/2]
-        #self.center_depth = numpy.mean(data.ranges)
+        
+        #Depth is equal to the minimum value in the data callback array
+        self.depth = numpy.nanmin(data.ranges)
         
             
     def talker(self):
+        r = rospy.Rate(10)
         while not rospy.is_shutdown():            
-            r = rospy.Rate(10)
+            
             msg = ""
             #Perform forward kinematics operation
+            #The value is inversed so the robot moves slower when closer to loved objects.
             v, a = self.forward_kinematics(1 - (self.mean_right/255),1  - (self.mean_left/255))
-            print self.mean_left
-            print self.mean_right
+            #print self.mean_left
+            #print self.mean_right
             
             
             #Create a twist message
             twist_msg = Twist()
             
             #Check if turtlebot is close to an object, if it's the "loved" object then stop.
-            if self.center_depth < 1.5 and (self.mean_right + self.mean_left) / 2 > 10:
+            if self.center_depth < 1.5 and self.mean_right > 1 and self.mean_left > 1:
                 twist_msg.linear.x = 0.0
                 twist_msg.angular.z = 0.0
                 msg = "Close to loved object"
@@ -124,13 +132,10 @@ class braitenberg_love:
             else:
                 msg = ""
                 
-                #This block of if statements is just to prevent the turtlebot
-                #moving at ridiculous speeds
+                #prevent the turtlebot moving at ridiculous speeds
                 if v > self.vel_linear_limit:
                     v = self.vel_linear_limit
-                    msg = msg + "Linear velocity limited. "
                 if a > self.vel_angular_limit:
-                    msg = msg + "Angular velocity limited. "
                     a = self.vel_angular_limit   
                 
                 #Add the values to the twist message
@@ -139,7 +144,6 @@ class braitenberg_love:
                 msg = "Moving..."
 
             #Publish!
-            print 
             self.pub.publish(twist_msg)
             print msg
             r.sleep()
@@ -154,7 +158,9 @@ class braitenberg_love:
 
 #Initialise a new node for our code           
 rospy.init_node('braitenberg_love', anonymous=True)   
+#Initialise class
 bl = braitenberg_love()
+#Run talker
 bl.talker()
 rospy.spin()
 cv2.destroyAllWindows()

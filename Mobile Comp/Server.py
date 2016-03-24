@@ -18,9 +18,9 @@ class databaseRequestHandler(tornado.web.RequestHandler):
         _db.commit()
         self.write('OK')
     def get(self):
+
         for line in _db.iterdump():
-            self.write(line)
-         
+            self.write(line)         
          
 class itemRequestHandler(tornado.web.RequestHandler):
     def put(self, item):
