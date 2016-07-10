@@ -15,11 +15,13 @@ import shutil, os
 
 #Folders to sort files in to
 dir_iso = "System Images"
-dir_pdf = "PDFs"
+dir_pdf = "Adobe PDFs"
 dir_gp = "Guitar Pro Tabs"
-dir_imgs = "Pictures"
+dir_media = "Media"
 dir_exe = 'Executables'
 dir_arch = 'Archives'
+dir_misc = 'Miscelaneous'
+dir_doc = 'Documents'
 
 #Dictionary storing the file extension and the folder it should be relocated to
 #Populate this with the additional extensions and 
@@ -27,13 +29,37 @@ locations = {'.iso': dir_iso,
              '.pdf': dir_pdf,
              '.gp5': dir_gp,
              '.gp4': dir_gp,
+             '.gp3': dir_gp,
              '.gpx': dir_gp,
+             '.midi': dir_gp,
+             '.mid': dir_gp,
              '.exe': dir_exe,
+             '.msi': dir_exe,
+             '.jar': dir_exe,
              '.rar': dir_arch,
              '.zip': dir_arch,
              '.7z': dir_arch,
              '.tar': dir_arch,
-             '.tar.gz': dir_arch,
+             '.gz': dir_arch,
+             '.xz': dir_arch,
+             '.png': dir_media,
+             '.jpg': dir_media,
+             '.gif': dir_media,
+             '.jpeg': dir_media,
+             '.jpg:large': dir_media,
+             '.psd': dir_media,
+             '.mp4': dir_media,
+             '.avi': dir_media,
+             '.wav': dir_media,
+             '.mp3': dir_media,
+             '.dca': dir_media,
+             '.txt': dir_misc,
+             '.torrent': dir_misc,
+             '.sdx': dir_misc,
+             '.htm': dir_misc,
+             '.doc': dir_doc,
+             '.docx': dir_doc,
+             '.xls': dir_doc
              }
 
 #Check if folders exist for tracked files and create them if none exist.
@@ -45,8 +71,6 @@ for ext in locations:
     except:
         print('Making directory for: ' + folder)
         os.mkdir(folder)
-    else:
-        print(folder + ' already exists.')
         
 print('Begining to move files...\n')
 countSuccess = 0
